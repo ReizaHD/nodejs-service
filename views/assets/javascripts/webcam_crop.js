@@ -1,9 +1,8 @@
 let cropper = "";
-let hidden_cropper = "";
+let cropper_predict = "";
 let model;
-let worker;
+let cropperData;
 const previewImage = document.getElementById("preview-image");
-const hiddenImage = document.getElementById("preview-image-crop");
 const test = document.getElementById("test");
 const webcam = new Webcam(document.getElementById('wc'));
 
@@ -12,38 +11,6 @@ async function init(){
   model = await tf.loadLayersModel('js/tf_model/model.json');
   console.log(model.summary());
 
-}
-
-async function startWorker(){
-  console.log('pressed');
-  
-  if (window.Worker) {
-      worker = new Worker('js/worker.js');
-      setInterval(async () => {
-        const dataURL = await webcam.captureWithoutTensorFlow();
-        const parameters = {dataURL, model};
-        worker.postMessage(parameters);
-      }, 10000); // Run every 10 seconds
-      
-      worker.onmessage = function(event) {
-          console.log("berhasil");
-      };
-
-      worker.onerror = function(error) {
-          console.error('Worker error:', error);
-      };
-  } else {
-      console.error('Web Workers are not supported in your browser.');
-  }
-}
-
-function stopWorker(){
-  
-  if (worker) {
-    console.log('pressed');
-    worker.terminate();
-    worker = null;
-  }
 }
 
 async function captureNow(){
@@ -70,7 +37,30 @@ async function cropCapture(){
     console.log(data);
     const column = document.getElementById("column_input");
     const row = document.getElementById("row_input");
+
+    //kirim variable data, row, column ke database
+
   }
+}
+
+function convertToTf(imgSrc){
+  return tf.tidy(() => {
+    // Reads the image as a Tensor from the webcam <video> element.
+    const webcamImage = tf.browser.fromPixels(imgSrc);
+
+    const reversedImage = webcamImage.reverse(1);
+
+    // Crop the image so we're using the center square of the rectangular
+    // webcam.
+    const croppedImage = webcam.cropImage(reversedImage);
+
+    // Expand the outer most dimension so we have a batch size of 1.
+    const batchedImage = croppedImage.expandDims(0);
+
+    // Normalize the image between -1 and 1. The image comes in between 0-255,
+    // so we divide by 127 and subtract 1.
+    return batchedImage.toFloat().div(tf.scalar(127)).sub(tf.scalar(1));
+  });
 }
 
 function sendData(){
@@ -80,6 +70,32 @@ function sendData(){
 function cropReset(){
   if(cropper){
     cropper.reset();
+  }
+}
+
+async function predict(img){
+  let processedImg = convertToTf(img);
+  let resizedTensorFrame = tf.image.resizeBilinear(processedImg,[150,
+    150]);
+
+  let predictions = await model.predict(resizedTensorFrame);
+  // const myJSON = JSON.stringify(predictions.argMax());
+  const classId = (await predictions.data())[0];
+  if(classId >= 10e-20){
+    return 0;
+  }else {
+    return 1;
+  }
+}
+
+function predictAll(){
+  // cropperData = //Ambil semua data dari database;
+  for (let i = 0; i < cropperData.length; i++) {
+    cropper.setCropBoxData(cropperData[i]);
+    let img = cropper.getCroppedCanvas({});
+    let classId = predict(img);
+    //update data di database
+
   }
 }
 
