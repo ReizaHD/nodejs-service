@@ -50,10 +50,10 @@ async function startInterval() {
       console.log(i);
 
       let { left, top, width, height } = cropperData[i];
-      left = left * 1.1862836;
-      top = top * 1.1862836;
-      width = width * 1.1862836;
-      height = height * 1.1862836;
+      // left = left * 1.1862836;
+      // top = top * 1.1862836;
+      // width = width * 1.1862836;
+      // height = height * 1.1862836;
 
       const offscreenCanvas = document.createElement('canvas');
       const offscreenCtx = offscreenCanvas.getContext('2d');
@@ -97,8 +97,8 @@ async function cropCapture(){
   if(cropper){
     let data = cropper.getCropBoxData();
     console.log(data);
-    const column = document.getElementById("column_input");
-    const row = document.getElementById("row_input");
+    const column = document.getElementById("column_input").value;
+    const row = document.getElementById("row_input").value;
 
     dataToSend = {
       "left" : data['left'],
@@ -132,12 +132,12 @@ function sendData(){
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
-        left : data['left'],
-        top : data['top'],
-        width : data['width'],
-        height : data['height'],
-        row : row,
-        column : column
+        left : dataToSend['left'],
+        top : dataToSend['top'],
+        width : dataToSend['width'],
+        height : dataToSend['height'],
+        row : dataToSend['row'],
+        column : dataToSend['column']
       }),
     })
     .then(response => response.text())

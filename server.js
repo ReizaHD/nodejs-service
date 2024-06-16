@@ -22,23 +22,23 @@ app.get('/', (req, res) => {
 app.get('/park_slot', (req, res) => {
   const data = {
     1: {
-      "left": 886.75,
-      "top": 256,
-      "width": 31,
-      "height": 56
-  },
+      "left": 1026.5,
+      "top": 621,
+      "width": 37,
+      "height": 73
+    },
     2: {
-      "left": 888.75,
-      "top": 365,
-      "width": 31,
-      "height": 56
+      "left": 1021.5,
+      "top": 240,
+      "width": 37,
+      "height": 73
     },
     3: {
-      "left": 890.75,
-      "top": 419,
-      "width": 31,
-      "height": 56
-  }
+      "left": 784.5,
+      "top": 431,
+      "width": 37,
+      "height": 73
+    }
   };
   res.setHeader('Content-Type', 'application/json');
   res.send(JSON.stringify(data));
@@ -47,9 +47,8 @@ app.get('/park_slot', (req, res) => {
 // This middleware is available in Express v4.16.0 onwards
 app.use(express.urlencoded({extended: true}));
 
-app.post('/add_data', (req, res) => {
+app.post('/add_slot', (req, res) => {
   console.log(req.body);
-  res.redirect('/thankyou');
 });
 
 app.post('/update', (req, res) => {
