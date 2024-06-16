@@ -116,14 +116,12 @@
         type="number"
         placeholder="Enter Row"
       />
-      <button id="6" onclick="startWorker()">Start Predicting</button>
-      <button id="7"onclick="stopWorker()">Stop Predicting</button>
+      <button id="6" onclick="startInterval()">Start Predicting</button>
+      <button id="7"onclick="stopInterval()">Stop Predicting</button>
       <button id="5" onclick="sendData()">Send Data</button>
     </div>
   </div>
-  <div hidden id="hidden_layer">
-    <img id="preview-image-crop" />
-  </div>
+  <canvas id="canvas" style="display:none;"></canvas>
 </body>
 <script src="js/webcam_crop.js"></script>
 </html>
