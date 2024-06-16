@@ -28,18 +28,24 @@ app.get('/webcam', (req, res) => {
 
 app.get('/park_slot', (req, res) => {
   const data = {
-    "1": {
-        "left": "204.5",
-        "top": "230",
-        "width": "155",
-        "height": "209"
+    1: {
+      "left": 886.75,
+      "top": 256,
+      "width": 31,
+      "height": 56
+  },
+    2: {
+      "left": 888.75,
+      "top": 365,
+      "width": 31,
+      "height": 56
     },
-    "2": {
-        "left": "255.5",
-        "top": "261",
-        "width": "156",
-        "height": "175"
-    }
+    3: {
+      "left": 890.75,
+      "top": 419,
+      "width": 31,
+      "height": 56
+  }
   };
   res.setHeader('Content-Type', 'application/json');
   res.send(JSON.stringify(data));

@@ -49,14 +49,15 @@ async function startInterval(){
         .then(data => {cropperData = data})   // Do something with the data
         .catch(error => console.error('Error:', error)); // Handle errors
 
-      console.log(cropperData.length);
+      console.log(cropperData);
 
       for (let i in cropperData) {
+        console.log(i);
         hiddenCropper.setCropBoxData(cropperData[i]);
         let img = hiddenCropper.getCroppedCanvas();
         let classId = await predict(img);
         console.log(classId);
-        await fetch('/update', {
+        fetch('/update', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -115,6 +116,7 @@ async function predict(img){
   let processedImg = convertToTf(img);
   let predictions = await model.predict(processedImg);
   const classId = (await predictions.data())[0];
+  console.log(classId);
   if(classId >= 10e-20){
     return classId;
   }else {
