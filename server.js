@@ -38,6 +38,18 @@ app.get('/park_slot', (req, res) => {
       "top": 431,
       "width": 37,
       "height": 73
+    },
+    4: {
+      "left": 694.5,
+      "top": 499,
+      "width": 39,
+      "height": 65
+    },
+    5: {
+      "left": 814.5,
+      "top": 620,
+      "width": 40,
+      "height": 79
     }
   };
   res.setHeader('Content-Type', 'application/json');

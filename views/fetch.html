@@ -9,21 +9,23 @@
     <p id="result"></p>
 
     <script>
-        document.getElementById('callFunctionButton').addEventListener('click', function() {
-            fetch('/update', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    key1: 'value1',
-                    key2: 'value2',
-                }),
-                })
-                .then(response => response.text())
-                .then(data => document.getElementById('result').innerText=data)
-                .catch(error => console.error('Error:', error));
-            });
+        let cropperData;
+        let json={};
+        document.getElementById('callFunctionButton').addEventListener('click', async function() {
+            await fetch('/park_slot')
+            .then(response => response.json()) // Parse the JSON from the response
+            .then(data => {cropperData = data})   // Do something with the data
+            .catch(error => console.error('Error:', error)); // Handle errors
+            console.log(cropperData);
+            for(i in cropperData){
+                let a = 0;
+                for(let j in cropperData[i]){
+                    a += cropperData[i][j];
+                }
+                json[i] = {class:a};
+            }
+            console.log(json);
+        });
     </script>
 </body>
 </html>

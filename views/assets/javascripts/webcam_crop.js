@@ -26,23 +26,24 @@ async function captureNow(){
 
 async function startInterval() {
   let cropperData;
-  intervalId = setInterval(async () => {
+  let classes = {};
+  await fetch('/park_slot')
+        .then(response => response.json()) // Parse the JSON from the response
+        .then(data => {cropperData = data})   // Do something with the data
+        .catch(error => console.error('Error:', error)); // Handle errors
+  
+
+  async function runIteration() {
     console.log('halo');
     const ctx = canvas.getContext('2d');
     const dataURL = await webcam.captureWithoutTensorFlow(); // an URL of an image captured from webcam
-    
+    // let test = [(document.getElementById("test1")),(document.getElementById("test2")),(document.getElementById("test3")),(document.getElementById('test4'))];
     const img = new Image();
     img.src = dataURL;
 
     await new Promise((resolve) => {
       img.onload = resolve;
     });
-
-    // GET CROPPED DATA
-    await fetch('/park_slot')
-        .then(response => response.json()) // Parse the JSON from the response
-        .then(data => {cropperData = data})   // Do something with the data
-        .catch(error => console.error('Error:', error)); // Handle errors
 
     console.log(cropperData);
 
@@ -55,42 +56,48 @@ async function startInterval() {
       // width = width * 1.1862836;
       // height = height * 1.1862836;
 
-      const offscreenCanvas = document.createElement('canvas');
-      const offscreenCtx = offscreenCanvas.getContext('2d');
-      offscreenCanvas.width = width;
-      offscreenCanvas.height = height;
-      offscreenCtx.drawImage(img, left, top, width, height, 0, 0, width, height);
-      const croppedImageURL = offscreenCanvas.toDataURL();
+      // const offscreenCanvas = document.createElement('canvas');
+      // const offscreenCtx = offscreenCanvas.getContext('2d');
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(img, left, top, width, height, 0, 0, width, height);
+      const croppedImageURL = canvas.toDataURL();
       const croppedImg = new Image();
       croppedImg.src = croppedImageURL;
+      // test[i-1].src = croppedImageURL;
       await new Promise((resolve) => {
         croppedImg.onload = resolve;
       });
 
       let classId = await predict(croppedImg);
       console.log(classId);
-
-      fetch('/update', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          id: i.toString(),
-          class: classId,
-        }),
-      })
-      .then(response => response.text())
-      .then(data => console.log(data))
-      .catch(error => console.error('Error:', error));
+      classes[i] = classId;
     }
+    console.log(classes);
+    fetch('/update', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams(classes),
+    })
+    .then(response => response.text())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
 
-  }, 5000);
+    // Schedule the next iteration after 5000 milliseconds
+    setTimeout(runIteration, 1000);
+  }
+
+  // Start the initial iteration
+  runIteration();
 }
 
 
+
 function stopInterval(){
-  clearInterval(intervalId);
+  clearTimeout(intervalId);
+  intervalId = null;
 }
 
 async function cropCapture(){
@@ -156,15 +163,14 @@ function cropReset(){
 
 async function predict(img){
   let classId;
-  tf.tidy(async () => {
   let processedImg = convertToTf(img);
   let predictions = await model.predict(processedImg);
   classId = (await predictions.data())[0];
-  });
+  console.log(classId);
   if(classId >= 10e-20){
-    return 1;
-  }else {
     return 0;
+  }else {
+    return 1;
   }
 }
 
