@@ -105,24 +105,19 @@
       <select id="device-list"></select>
       <button type="button" id="2" onclick="captureNow()" >Capture</button>
       <button id="4" onclick="cropReset()">Reset</button>
-      <button id="3" onclick="cropCapture()">Get Data</button>
-      <input
-        id="column_input"
-        type="number"
-        placeholder="Enter Column"
-      />
       <input
         id="row_input"
         type="number"
         placeholder="Enter Row"
       />
+      <input
+        id="column_input"
+        type="number"
+        placeholder="Enter Column"
+      />
+      <button id="5" onclick="sendData()">Send Data</button>
       <button id="6" onclick="startInterval()">Start Predicting</button>
       <button id="7"onclick="stopInterval()">Stop Predicting</button>
-      <button id="5" onclick="sendData()">Send Data</button>
-      <img id="test1"/>
-      <img id="test2"/>
-      <img id="test3"/>
-      <img id="test4"/>
     </div>
   </div>
   <canvas id="canvas" style="display:none;"></canvas>

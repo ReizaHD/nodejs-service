@@ -1,10 +1,11 @@
 let cropper = "";
 let dataToSend;
-let intervalId;
 const canvas = document.getElementById('canvas');
 let model;
 const previewImage = document.getElementById("preview-image");
 const webcam = new Webcam(document.getElementById('wc'));
+
+let continueInterval = true;
 
 async function init(){
   await webcam.setup("device-list");
@@ -28,16 +29,15 @@ async function startInterval() {
   let cropperData;
   let classes = {};
   await fetch('/park_slot')
-        .then(response => response.json()) // Parse the JSON from the response
-        .then(data => {cropperData = data})   // Do something with the data
-        .catch(error => console.error('Error:', error)); // Handle errors
+        .then(response => response.json())
+        .then(data => {cropperData = data})
+        .catch(error => console.error('Error:', error));
   
 
   async function runIteration() {
     console.log('halo');
     const ctx = canvas.getContext('2d');
-    const dataURL = await webcam.captureWithoutTensorFlow(); // an URL of an image captured from webcam
-    // let test = [(document.getElementById("test1")),(document.getElementById("test2")),(document.getElementById("test3")),(document.getElementById('test4'))];
+    const dataURL = await webcam.captureWithoutTensorFlow();
     const img = new Image();
     img.src = dataURL;
 
@@ -48,23 +48,15 @@ async function startInterval() {
     console.log(cropperData);
 
     for (let i in cropperData) {
-      console.log(i);
+      console.log("car "+i);
 
       let { left, top, width, height } = cropperData[i];
-      // left = left * 1.1862836;
-      // top = top * 1.1862836;
-      // width = width * 1.1862836;
-      // height = height * 1.1862836;
-
-      // const offscreenCanvas = document.createElement('canvas');
-      // const offscreenCtx = offscreenCanvas.getContext('2d');
       canvas.width = width;
       canvas.height = height;
       ctx.drawImage(img, left, top, width, height, 0, 0, width, height);
       const croppedImageURL = canvas.toDataURL();
       const croppedImg = new Image();
       croppedImg.src = croppedImageURL;
-      // test[i-1].src = croppedImageURL;
       await new Promise((resolve) => {
         croppedImg.onload = resolve;
       });
@@ -81,44 +73,43 @@ async function startInterval() {
       },
       body: new URLSearchParams(classes),
     })
-    .then(response => response.text())
+    .then(response => console.log(response.text()))
     .then(data => console.log(data))
     .catch(error => console.error('Error:', error));
 
-    // Schedule the next iteration after 5000 milliseconds
-    setTimeout(runIteration, 1000);
+    // Schedule the next iteration after 10000 milliseconds (10 seconds)
+    if(continueInterval){
+      setTimeout(runIteration, 10000);
+    }
   }
 
   // Start the initial iteration
+  continueInterval = true;
   runIteration();
 }
 
-
-
 function stopInterval(){
-  clearTimeout(intervalId);
-  intervalId = null;
+  continueInterval = false;
+  console.log('Interval stopped');
 }
 
-async function cropCapture(){
-  if(cropper){
-    let data = cropper.getCropBoxData();
-    console.log(data);
-    const column = document.getElementById("column_input").value;
-    const row = document.getElementById("row_input").value;
+// async function cropCapture(){
+//   if(cropper){
+//     let data = cropper.getCropBoxData();
+//     console.log(data);
+//     const column = document.getElementById("column_input").value;
+//     const row = document.getElementById("row_input").value;
 
-    dataToSend = {
-      "left" : data['left'],
-      "top" : data['top'],
-      "width" : data['width'],
-      "height" : data['height'],
-      "row" : row,
-      "column" : column
-    }
-    
-
-  }
-}
+//     dataToSend = {
+//       "left" : data['left'],
+//       "top" : data['top'],
+//       "width" : data['width'],
+//       "height" : data['height'],
+//       "row" : row,
+//       "column" : column
+//     }
+//   }
+// }
 
 function convertToTf(imgSrc){
   return tf.tidy(() => {
@@ -132,25 +123,49 @@ function convertToTf(imgSrc){
 }
 
 function sendData(){
+  
+  if(cropper){
+    let data = cropper.getCropBoxData();
+    console.log(data);
+    const column = document.getElementById("column_input").value;
+    const row = document.getElementById("row_input").value;
+
+    dataToSend = {
+      "left" : data['left'],
+      "top" : data['top'],
+      "width" : data['width'],
+      "height" : data['height'],
+      "row" : row,
+      "column" : column
+    };
+  }
+
   if(dataToSend){
-    fetch('/add_slot', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        left : dataToSend['left'],
-        top : dataToSend['top'],
-        width : dataToSend['width'],
-        height : dataToSend['height'],
-        row : dataToSend['row'],
-        column : dataToSend['column']
-      }),
-    })
-    .then(response => response.text())
-    .then(data => console.log(data))
-    .catch(error => console.error('Error:', error));
-    cropReset();
+    let text = "Are you sure you want send the data.\n\
+    Row: "+dataToSend['row']+" Column: "+dataToSend['column'];
+    if (confirm(text) == true) {
+      fetch('/add_slot', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          left : dataToSend['left'],
+          top : dataToSend['top'],
+          width : dataToSend['width'],
+          height : dataToSend['height'],
+          row : dataToSend['row'],
+          column : dataToSend['column']
+        }),
+      })
+      .then(response => response.text())
+      .then(data => console.log(data))
+      .catch(error => console.error('Error:', error));
+      dataToSend = null;
+      cropReset();
+    }
+    console.log("Data to Send:");
+    console.log(dataToSend);
   }
 }
 
@@ -167,7 +182,7 @@ async function predict(img){
   let predictions = await model.predict(processedImg);
   classId = (await predictions.data())[0];
   console.log(classId);
-  if(classId >= 10e-20){
+  if(classId >= 1e-20){
     return 0;
   }else {
     return 1;

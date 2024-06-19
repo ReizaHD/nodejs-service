@@ -22,35 +22,65 @@ app.get('/', (req, res) => {
 app.get('/park_slot', (req, res) => {
   const data = {
     1: {
-      "left": 1026.5,
-      "top": 621,
-      "width": 37,
-      "height": 73
-    },
+      "left": 282.5,
+      "top": 33,
+      "width": 94,
+      "height": 165
+  },
     2: {
-      "left": 1021.5,
-      "top": 240,
-      "width": 37,
-      "height": 73
-    },
+      "left": 345.5,
+      "top": 34,
+      "width": 94,
+      "height": 165
+  },
     3: {
-      "left": 784.5,
-      "top": 431,
-      "width": 37,
-      "height": 73
-    },
+      "left": 466.5,
+      "top": 29,
+      "width": 94,
+      "height": 165
+  },
     4: {
-      "left": 694.5,
-      "top": 499,
-      "width": 39,
-      "height": 65
-    },
+      "left": 534.5,
+      "top": 30,
+      "width": 94,
+      "height": 165
+  },
     5: {
-      "left": 814.5,
-      "top": 620,
-      "width": 40,
-      "height": 79
-    }
+      "left": 602.5,
+      "top": 28,
+      "width": 94,
+      "height": 165
+  },
+    6: {
+      "left": 279.5,
+      "top": 323,
+      "width": 94,
+      "height": 165
+  },
+    7: {
+      "left": 347.5,
+      "top": 321,
+      "width": 94,
+      "height": 165
+  },
+    8: {
+      "left": 466.5,
+      "top": 321,
+      "width": 94,
+      "height": 165
+  },
+    9: {
+      "left": 536.5,
+      "top": 316,
+      "width": 94,
+      "height": 165
+  },
+    10: {
+      "left": 604.5,
+      "top": 317,
+      "width": 94,
+      "height": 165
+  }
   };
   res.setHeader('Content-Type', 'application/json');
   res.send(JSON.stringify(data));
@@ -61,6 +91,7 @@ app.use(express.urlencoded({extended: true}));
 
 app.post('/add_slot', (req, res) => {
   console.log(req.body);
+  res.send("Recieved");
 });
 
 app.post('/update', (req, res) => {
